@@ -84,6 +84,22 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    //self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 100, 654, 382)];
+    //[self.view addSubview:self.imageView];
+    
+    [self pngtojpg];
+}
+- (void) imageShow {
+    UIImage* image = [UIImage imageNamed:@"a.png"];
+    self.imageView.image = image;
+}
+
+- (void) pngtojpg {
+    UIImage* image = [UIImage imageNamed:@"a.png"];
+    
+    NSData* data = UIImageJPEGRepresentation(image, 1.0f);
+    UIImage *imageJpg = [UIImage imageWithData:data];
+    self.imageView.image = imageJpg;
 }
 
 - (void)didReceiveMemoryWarning {
