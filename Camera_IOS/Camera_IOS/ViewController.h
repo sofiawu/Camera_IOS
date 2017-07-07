@@ -18,5 +18,7 @@
 @property (strong, nonatomic) AVAudioRecorder* recorder;
 @property (strong, nonatomic) AVAudioPlayer* player;
 
+@property (strong, nonatomic) AVPlayerViewController *playerController;
+
 @end
 

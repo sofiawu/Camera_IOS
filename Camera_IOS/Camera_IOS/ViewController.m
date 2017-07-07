@@ -9,6 +9,10 @@
 #import "ViewController.h"
 
 @interface ViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+{
+    NSURL *mediaUrl;
+    
+}
 
 @property (strong, nonatomic) IBOutlet UIImageView *imageView;
 
@@ -22,9 +26,12 @@
         _imagePickerController = [[UIImagePickerController alloc] init];
         
         //采集源类型
-        _imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        //_imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        _imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
         //媒体类型
-        _imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeImage];
+        //_imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeImage];
+        _imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeMovie];
+        _imagePickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
         //代理
         _imagePickerController.delegate = self;
     }
@@ -57,11 +64,27 @@
     return _player;
 }
 
+- (AVPlayerViewController*) playerController {
+    if(!_playerController) {
+        _playerController = [[AVPlayerViewController alloc] init];
+        
+        _playerController.player = [[AVPlayer alloc] initWithURL:mediaUrl];
+        
+        //全屏播放
+        //[self presentViewController:self.playerController animated:YES completion:nil];
+        
+        //小窗口播放
+        self.playerController.view.frame = CGRectMake(10, 100, 400, 400);
+        [self.view addSubview:self.playerController.view];
+    }
+    
+    return _playerController;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
 }
-
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -86,6 +109,8 @@
         UIImage* image = info[UIImagePickerControllerOriginalImage];
         
         self.imageView.image = image;
+    } else if([ type isEqualToString:(__bridge NSString*)kUTTypeMovie]) {
+        mediaUrl = info[UIImagePickerControllerMediaURL];
     }
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -94,7 +119,6 @@
     NSLog(@"取消采集图片");
     [self dismissViewControllerAnimated:YES completion:nil];
 }
-
 
 - (IBAction)record:(UIButton *)sender {
     if(sender.isSelected == NO) {
@@ -109,4 +133,13 @@
     [self.player play];
 }
 
+- (IBAction)takeVideo:(UIButton *)sender {
+    if([UIImagePickerController isSourceTypeAvailable:
+        UIImagePickerControllerSourceTypeCamera]) {
+        [self presentViewController:self.imagePickerController animated:YES completion:nil];
+    }
+}
+- (IBAction)playVideo:(UIButton *)sender {
+    [self.playerController.player play];
+}
 @end
