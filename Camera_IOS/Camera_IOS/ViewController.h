@@ -15,5 +15,8 @@
 
 @property (strong, nonatomic) UIImagePickerController *imagePickerController;
 
+@property (strong, nonatomic) AVAudioRecorder* recorder;
+@property (strong, nonatomic) AVAudioPlayer* player;
+
 @end
 

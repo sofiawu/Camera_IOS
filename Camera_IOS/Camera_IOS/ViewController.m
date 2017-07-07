@@ -31,6 +31,32 @@
     return _imagePickerController;
 }
 
+- (AVAudioRecorder*) recorder {
+    if(!_recorder) {
+        NSString* path = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/record"];
+        NSMutableDictionary* settingDic = [[NSMutableDictionary alloc] init];
+        [settingDic setValue:[NSNumber numberWithInt:44100] forKey:AVSampleRateKey];
+        [settingDic setValue:[NSNumber numberWithInt:kAudioFormatMPEG4AAC] forKey:AVFormatIDKey];
+        [settingDic setValue:[NSNumber numberWithInt:1] forKey:AVNumberOfChannelsKey];
+        [settingDic setValue:[NSNumber numberWithInt:AVAudioQualityHigh] forKey:AVEncoderAudioQualityKey];
+        
+        _recorder = [[AVAudioRecorder alloc] initWithURL:[NSURL fileURLWithPath:path] settings:settingDic error:nil];
+        [_recorder prepareToRecord];
+    }
+    return _recorder;
+}
+
+- (AVAudioPlayer*) player {
+    if(!_player) {
+        //NSString* path = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/record"];
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"q0000" ofType:@"wav"];
+        
+        _player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:nil];
+        [_player prepareToPlay];
+    }
+    return _player;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -67,6 +93,20 @@
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
     NSLog(@"取消采集图片");
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+
+- (IBAction)record:(UIButton *)sender {
+    if(sender.isSelected == NO) {
+        [self.recorder record];
+        sender.selected = YES;
+    } else {
+        [self.recorder stop];
+        sender.selected = NO;
+    }
+}
+- (IBAction)play:(UIButton *)sender {
+    [self.player play];
 }
 
 @end

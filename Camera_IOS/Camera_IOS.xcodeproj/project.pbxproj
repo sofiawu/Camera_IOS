@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3BE59B0F1F0FD90E00A78E98 /* q0000.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3BE59B0E1F0FD90E00A78E98 /* q0000.wav */; };
 		EACB7F361F0F5CB6003EB673 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EACB7F351F0F5CB6003EB673 /* main.m */; };
 		EACB7F391F0F5CB6003EB673 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EACB7F381F0F5CB6003EB673 /* AppDelegate.m */; };
 		EACB7F3C1F0F5CB6003EB673 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EACB7F3B1F0F5CB6003EB673 /* ViewController.m */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3BE59B0E1F0FD90E00A78E98 /* q0000.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = q0000.wav; sourceTree = "<group>"; };
 		EACB7F311F0F5CB6003EB673 /* Camera_IOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Camera_IOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EACB7F351F0F5CB6003EB673 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		EACB7F371F0F5CB6003EB673 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 		EACB7F331F0F5CB6003EB673 /* Camera_IOS */ = {
 			isa = PBXGroup;
 			children = (
+				3BE59B0E1F0FD90E00A78E98 /* q0000.wav */,
 				EACB7F371F0F5CB6003EB673 /* AppDelegate.h */,
 				EACB7F381F0F5CB6003EB673 /* AppDelegate.m */,
 				EACB7F3A1F0F5CB6003EB673 /* ViewController.h */,
@@ -140,6 +143,7 @@
 			files = (
 				EACB7F441F0F5CB6003EB673 /* LaunchScreen.storyboard in Resources */,
 				EACB7F411F0F5CB6003EB673 /* Assets.xcassets in Resources */,
+				3BE59B0F1F0FD90E00A78E98 /* q0000.wav in Resources */,
 				EACB7F3F1F0F5CB6003EB673 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -312,6 +316,7 @@
 				EACB7F4A1F0F5CB6003EB673 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
