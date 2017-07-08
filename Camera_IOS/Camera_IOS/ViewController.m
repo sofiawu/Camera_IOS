@@ -99,6 +99,7 @@
     //[self convertFormatTest];
     [self testImageGray];
     [self testImageReColor];
+    [self testImageHighlight];
 }
 
 -(void) testImageGray {
@@ -115,6 +116,14 @@
     unsigned char* imageReColorData = [self imageReColorWithData:imageData width:image.size.width height:image.size.height];
     UIImage* imageNew = [self convertDataToUIImage:imageReColorData width:image.size.width height:image.size.height];
     imageView2.image = imageNew;
+}
+
+-(void) testImageHighlight {
+    UIImage* image = [UIImage imageNamed:@"lena.jpg"];
+    unsigned char* imageData = [self convertUIImageToData:image];
+    unsigned char* imageHightlightData = [self imageHighlightWithData:imageData width:image.size.width height:image.size.height];
+    UIImage* imageNew = [self convertDataToUIImage:imageHightlightData width:image.size.width height:image.size.height];
+    imageView3.image = imageNew;
 }
 
 -(void) convertFormatTest {
@@ -214,6 +223,51 @@
             unsigned char bitMapRedNew = 255 - bitMapRed;
             unsigned char bitMapGreenNew = 255 - bitMapGreen;
             unsigned char bitMapBlueNew = 255 - bitMapBlue;
+            memset(resultData + imageIndex * 4, bitMapRedNew, 1);
+            memset(resultData + imageIndex * 4 + 1, bitMapGreenNew, 1);
+            memset(resultData + imageIndex * 4 + 2, bitMapBlueNew, 1);
+        }
+    }
+    
+    return resultData;
+}
+
+-(unsigned char*) imageHighlightWithData:(unsigned char*) imageData width:(CGFloat)width height: (CGFloat)height {
+    unsigned char* resultData = malloc(width * height * sizeof(unsigned char) * 4 );
+    memset(resultData, 0, width * height * sizeof(unsigned char) * 4);
+    
+    NSArray* colorArrayBase = @[@"55", @"110", @"155", @"185", @"220", @"240", @"250", @"255"];
+    NSMutableArray* colorArray = [[NSMutableArray alloc] init];
+    
+    float step = 0.0f;
+    int beforeNum = 0;
+    for(int i = 0; i < 8; ++i) {
+        NSString *numStr = [colorArrayBase objectAtIndex:i];
+        int num = numStr.intValue;
+        
+        step = (num - beforeNum) / 32.0f;
+        for(int j = 0; j < 32; ++j) {
+            int newNum = (int)(beforeNum + j * step);
+            
+            NSString *newNumStr = [NSString stringWithFormat:@"%d", newNum];
+            [colorArray addObject:newNumStr];
+        }
+        beforeNum = num;
+    }
+    
+    for(int h = 0; h < height; ++h) {
+        for(int w = 0; w < width; ++w) {
+            unsigned int imageIndex = h * width + w;
+            unsigned char bitMapRed = *(imageData + imageIndex * 4);
+            unsigned char bitMapGreen = *(imageData + imageIndex * 4 + 1);
+            unsigned char bitMapBlue = *(imageData + imageIndex * 4 + 2);
+            
+            NSString* redStr = [colorArray objectAtIndex:bitMapRed];
+            NSString* greenStr = [colorArray objectAtIndex:bitMapGreen];
+            NSString* blueStr = [colorArray objectAtIndex:bitMapBlue];
+            unsigned char bitMapRedNew = redStr.intValue;
+            unsigned char bitMapGreenNew = greenStr.intValue;
+            unsigned char bitMapBlueNew = blueStr.intValue;
             memset(resultData + imageIndex * 4, bitMapRedNew, 1);
             memset(resultData + imageIndex * 4 + 1, bitMapGreenNew, 1);
             memset(resultData + imageIndex * 4 + 2, bitMapBlueNew, 1);
