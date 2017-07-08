@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @interface ViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 {
@@ -34,9 +35,11 @@
         //_imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         _imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
         //媒体类型
-        //_imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeImage];
-        _imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeMovie];
-        _imagePickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
+        _imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeImage];
+        
+        //_imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeMovie];
+        //_imagePickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
+        //_imagePickerController.allowsEditing = false;
         //代理
         _imagePickerController.delegate = self;
     }
@@ -93,11 +96,42 @@
     //[self.view addSubview:self.imageView];
     
     //[self pngtojpg];
-    [self loadImage];
+    //[self loadImage];
     //[self convertFormatTest];
-    [self testImageGray];
+    //[self testImageGray];
     //[self testImageReColor];
     //[self testImageHighlight];
+    
+    //create a thread
+    dispatch_queue_t q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(q, ^{
+        NSLog(@"CurrentThread = %@", [NSThread currentThread]);
+    });
+}
+
+- (BOOL) isCameraAvailable{
+    return [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera];
+}
+-(BOOL) isCameraFlashFrontAvailable{
+    return [UIImagePickerController isFlashAvailableForCameraDevice:UIImagePickerControllerCameraDeviceFront];
+}
+-(BOOL) isCameraFlashRearAvailable{
+    return [UIImagePickerController isFlashAvailableForCameraDevice:UIImagePickerControllerCameraDeviceRear];
+}
+-(BOOL) isCameraFrontAvailable{
+    return [UIImagePickerController isCameraDeviceAvailable:UIImagePickerControllerCameraDeviceFront];
+}
+-(BOOL) isCameraRearAvailable{
+    return [UIImagePickerController isCameraDeviceAvailable:UIImagePickerControllerCameraDeviceRear];
+}
+-(BOOL) isCameraSupportMedia:(NSString*)parmMediaType{
+    NSArray *availableMedia = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+    for(NSString *item in availableMedia) {
+        if([item isEqualToString:parmMediaType]) {
+            return true;
+        }
+    }
+    return false;
 }
 
 -(void) testImageGray {
@@ -308,14 +342,38 @@
         unsigned char* imageDataNew = [self imageGrayWithData:imageData width:image.size.width height:image.size.height];
         UIImage* imageNew = [self convertDataToUIImage:imageDataNew width:image.size.width height:image.size.height];
         
-        imageView1.image = image;
-        imageView2.image = imageNew;
-        //self.imageView.image = image;
-        //UIImageWriteToSavedPhotosAlbum(imageNew, nil, nil, nil);
+        self.imageView.image = imageNew;
+        self.imageView.contentMode = UIViewContentModeScaleToFill;
+        
+        //save image
+        SEL saveImage = @selector(ImageWasSavedSuccessfully:didFinishSavingWithError:contextInfo:);
+        UIImageWriteToSavedPhotosAlbum(imageNew, self, saveImage, nil);
+        
+        //other info
+        NSDictionary* dict = info[UIImagePickerControllerMediaMetadata];
+        NSLog(@"dic = %@", dict);
     } else if([ type isEqualToString:(__bridge NSString*)kUTTypeMovie]) {
         mediaUrl = info[UIImagePickerControllerMediaURL];
+        //write video
+        ALAssetsLibrary* lib = [[ALAssetsLibrary alloc]init];
+        [lib writeVideoAtPathToSavedPhotosAlbum:mediaUrl completionBlock:^(NSURL* url, NSError* error){
+            if(error == nil) {
+                NSLog(@"Save video success.");
+            } else {
+                NSLog(@"save video failed. error = %@", error);
+            }
+        }];
     }
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+-(void)ImageWasSavedSuccessfully:(UIImage*)image
+        didFinishSavingWithError:(NSError*)error
+                     contextInfo:(void*)info {
+    if(error == nil) {
+        NSLog(@"Saved succussfully.");
+    } else {
+        NSLog(@"Saved failed. error = %@", error);
+    }
 }
 //取消采集图片的处理
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
@@ -339,6 +397,9 @@
 - (IBAction)takeVideo:(UIButton *)sender {
     if([UIImagePickerController isSourceTypeAvailable:
         UIImagePickerControllerSourceTypeCamera]) {
+        self.imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeMovie];
+        self.imagePickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
+        
         [self presentViewController:self.imagePickerController animated:YES completion:nil];
     }
 }
