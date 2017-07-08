@@ -16,8 +16,6 @@
     UIImageView* imageView1;
     UIImageView* imageView2;
     UIImageView* imageView3;
-    UIImageView* imageView4;
-    UIImageView* imageView5;
     
 }
 
@@ -98,8 +96,8 @@
     [self loadImage];
     //[self convertFormatTest];
     [self testImageGray];
-    [self testImageReColor];
-    [self testImageHighlight];
+    //[self testImageReColor];
+    //[self testImageHighlight];
 }
 
 -(void) testImageGray {
@@ -134,24 +132,18 @@
 }
 
 -(void) loadImage {
-    imageViewOri = [[UIImageView alloc] initWithFrame:CGRectMake(18, 18, 180, 135)];
+    imageViewOri = [[UIImageView alloc] initWithFrame:CGRectMake(10, 98, 180, 135)];
     [self.view addSubview:imageViewOri];
     imageViewOri.image = [UIImage imageNamed:@"lena.jpg"];
     
-    imageView1 = [[UIImageView alloc] initWithFrame:CGRectMake(18 + 180 + 18, 18, 180, 135)];
+    imageView1 = [[UIImageView alloc] initWithFrame:CGRectMake(10 + 180 + 10, 98, 180, 135)];
     [self.view addSubview:imageView1];
 
-    imageView2 = [[UIImageView alloc] initWithFrame:CGRectMake(18, 18 + 135 + 18, 180, 135)];
+    imageView2 = [[UIImageView alloc] initWithFrame:CGRectMake(10, 98 + 135 + 38, 180, 135)];
     [self.view addSubview:imageView2];
 
-    imageView3 = [[UIImageView alloc] initWithFrame:CGRectMake(18 + 180 + 18, 18 + 135 + 18, 180, 135)];
+    imageView3 = [[UIImageView alloc] initWithFrame:CGRectMake(10 + 180 + 10, 98 + 135 + 38, 180, 135)];
     [self.view addSubview:imageView3];
-
-    imageView4 = [[UIImageView alloc] initWithFrame:CGRectMake(18, 18 + 135 + 18 + 135 + 18, 180, 135)];
-    [self.view addSubview:imageView4];
-    
-    imageView5 = [[UIImageView alloc] initWithFrame:CGRectMake(18 + 180 + 18, 18 + 135 + 18 + 135 + 18, 180, 135)];
-    [self.view addSubview:imageView5];
 }
 - (unsigned char*) convertUIImageToData: (UIImage*) image {
     CGImageRef imageRef = [image CGImage];
@@ -302,6 +294,7 @@
     } else { //通过图片库采集
         self.imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     }
+    self.imagePickerController.mediaTypes = [NSArray arrayWithObject:(__bridge NSString*)kUTTypeImage];
     [self presentViewController:self.imagePickerController animated:YES completion:nil];
 }
 
@@ -311,8 +304,14 @@
     NSString *type = info[UIImagePickerControllerMediaType];
     if([ type isEqualToString:(__bridge NSString*)kUTTypeImage]) {
         UIImage* image = info[UIImagePickerControllerOriginalImage];
+        unsigned char* imageData = [self convertUIImageToData:image];
+        unsigned char* imageDataNew = [self imageGrayWithData:imageData width:image.size.width height:image.size.height];
+        UIImage* imageNew = [self convertDataToUIImage:imageDataNew width:image.size.width height:image.size.height];
         
-        self.imageView.image = image;
+        imageView1.image = image;
+        imageView2.image = imageNew;
+        //self.imageView.image = image;
+        //UIImageWriteToSavedPhotosAlbum(imageNew, nil, nil, nil);
     } else if([ type isEqualToString:(__bridge NSString*)kUTTypeMovie]) {
         mediaUrl = info[UIImagePickerControllerMediaURL];
     }
