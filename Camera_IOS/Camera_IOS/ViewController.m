@@ -12,6 +12,13 @@
 {
     NSURL *mediaUrl;
     
+    UIImageView* imageViewOri;
+    UIImageView* imageView1;
+    UIImageView* imageView2;
+    UIImageView* imageView3;
+    UIImageView* imageView4;
+    UIImageView* imageView5;
+    
 }
 
 @property (strong, nonatomic) IBOutlet UIImageView *imageView;
@@ -87,8 +94,135 @@
     //self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 100, 654, 382)];
     //[self.view addSubview:self.imageView];
     
-    [self pngtojpg];
+    //[self pngtojpg];
+    [self loadImage];
+    //[self convertFormatTest];
+    [self testImageGray];
+    [self testImageReColor];
 }
+
+-(void) testImageGray {
+    UIImage* image = [UIImage imageNamed:@"lena.jpg"];
+    unsigned char* imageData = [self convertUIImageToData:image];
+    unsigned char* imageGrayData = [self imageGrayWithData:imageData width:image.size.width height:image.size.height];
+    UIImage* imageNew = [self convertDataToUIImage:imageGrayData width:image.size.width height:image.size.height];
+    imageView1.image = imageNew;
+}
+
+-(void) testImageReColor {
+    UIImage* image = [UIImage imageNamed:@"lena.jpg"];
+    unsigned char* imageData = [self convertUIImageToData:image];
+    unsigned char* imageReColorData = [self imageReColorWithData:imageData width:image.size.width height:image.size.height];
+    UIImage* imageNew = [self convertDataToUIImage:imageReColorData width:image.size.width height:image.size.height];
+    imageView2.image = imageNew;
+}
+
+-(void) convertFormatTest {
+    UIImage* image = [UIImage imageNamed:@"lena.jpg"];
+    unsigned char* imageData = [self convertUIImageToData:image];
+    UIImage* imageNew = [self convertDataToUIImage:imageData width:image.size.width height:image.size.height];
+    imageView1.image = imageNew;
+}
+
+-(void) loadImage {
+    imageViewOri = [[UIImageView alloc] initWithFrame:CGRectMake(18, 18, 180, 135)];
+    [self.view addSubview:imageViewOri];
+    imageViewOri.image = [UIImage imageNamed:@"lena.jpg"];
+    
+    imageView1 = [[UIImageView alloc] initWithFrame:CGRectMake(18 + 180 + 18, 18, 180, 135)];
+    [self.view addSubview:imageView1];
+
+    imageView2 = [[UIImageView alloc] initWithFrame:CGRectMake(18, 18 + 135 + 18, 180, 135)];
+    [self.view addSubview:imageView2];
+
+    imageView3 = [[UIImageView alloc] initWithFrame:CGRectMake(18 + 180 + 18, 18 + 135 + 18, 180, 135)];
+    [self.view addSubview:imageView3];
+
+    imageView4 = [[UIImageView alloc] initWithFrame:CGRectMake(18, 18 + 135 + 18 + 135 + 18, 180, 135)];
+    [self.view addSubview:imageView4];
+    
+    imageView5 = [[UIImageView alloc] initWithFrame:CGRectMake(18 + 180 + 18, 18 + 135 + 18 + 135 + 18, 180, 135)];
+    [self.view addSubview:imageView5];
+}
+- (unsigned char*) convertUIImageToData: (UIImage*) image {
+    CGImageRef imageRef = [image CGImage];
+    CGSize imageSize = image.size;
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    void* data = malloc(imageSize.width * imageSize.height * 4);
+    CGContextRef context = CGBitmapContextCreate(data, imageSize.width, imageSize.height, 8, 4 * imageSize.width, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+    CGContextDrawImage(context, CGRectMake(0, 0, imageSize.width, imageSize.height), imageRef);
+    CGColorSpaceRelease(colorSpace);
+    CGContextRelease(context);
+    return (unsigned char*)data;
+}
+
+- (UIImage*) convertDataToUIImage: (unsigned char*)imageData width: (CGFloat)width height :(CGFloat)height {
+    NSInteger dataLength = width * height * 4;
+    
+    CGDataProviderRef provide = CGDataProviderCreateWithData(NULL, imageData, dataLength, NULL);
+    int bitsPerComponent = 8;
+    int bitsPerPixel = 32;
+    int bytesPerRow = 4 * width;
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+    CGColorRenderingIntent renderIntent = kCGRenderingIntentDefault;
+    
+    CGImageRef imageRef = CGImageCreate(width, height, bitsPerComponent, bitsPerPixel, bytesPerRow, colorSpace, bitmapInfo, provide, NULL, NO, renderIntent);
+    UIImage* imageNew = [UIImage imageWithCGImage:imageRef];
+    CFRelease(imageRef);
+    CGColorSpaceRelease(colorSpace);
+    CGDataProviderRelease(provide);
+    return imageNew;
+}
+
+-(unsigned char*) imageGrayWithData:(unsigned char*) imageData width:(CGFloat)width height: (CGFloat)height {
+    unsigned char* resultData = malloc(width * height * sizeof(unsigned char) * 4 );
+    memset(resultData, 0, width * height * sizeof(unsigned char) * 4);
+    
+    for(int h = 0; h < height; ++h) {
+        for(int w = 0; w < width; ++w) {
+            unsigned int imageIndex = h * width + w;
+            unsigned char bitMapRed = *(imageData + imageIndex * 4);
+            unsigned char bitMapGreen = *(imageData + imageIndex * 4 + 1);
+            unsigned char bitMapBlue = *(imageData + imageIndex * 4 + 2);
+            
+            int bitMap = bitMapRed * 77 / 255 + bitMapGreen * 151 / 255 + bitMapBlue * 88 / 255;
+            unsigned char newBitMap = (bitMap > 255) ? 255 : bitMap;
+            memset(resultData + imageIndex * 4, newBitMap, 1);
+            memset(resultData + imageIndex * 4 + 1, newBitMap, 1);
+            memset(resultData + imageIndex * 4 + 2, newBitMap, 1);
+        }
+    }
+    
+    return resultData;
+}
+
+-(unsigned char*) imageReColorWithData:(unsigned char*) imageData width:(CGFloat)width height: (CGFloat)height {
+    unsigned char* resultData = malloc(width * height * sizeof(unsigned char) * 4 );
+    memset(resultData, 0, width * height * sizeof(unsigned char) * 4);
+    
+    for(int h = 0; h < height; ++h) {
+        for(int w = 0; w < width; ++w) {
+            unsigned int imageIndex = h * width + w;
+            unsigned char bitMapRed = *(imageData + imageIndex * 4);
+            unsigned char bitMapGreen = *(imageData + imageIndex * 4 + 1);
+            unsigned char bitMapBlue = *(imageData + imageIndex * 4 + 2);
+            
+            unsigned char bitMapRedNew = 255 - bitMapRed;
+            unsigned char bitMapGreenNew = 255 - bitMapGreen;
+            unsigned char bitMapBlueNew = 255 - bitMapBlue;
+            memset(resultData + imageIndex * 4, bitMapRedNew, 1);
+            memset(resultData + imageIndex * 4 + 1, bitMapGreenNew, 1);
+            memset(resultData + imageIndex * 4 + 2, bitMapBlueNew, 1);
+        }
+    }
+    
+    return resultData;
+}
+
 - (void) imageShow {
     UIImage* image = [UIImage imageNamed:@"a.png"];
     self.imageView.image = image;
